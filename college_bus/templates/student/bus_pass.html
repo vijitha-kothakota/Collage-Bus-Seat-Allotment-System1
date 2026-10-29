@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Digital Bus Pass - ALTS College Bus{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-3">
+    <div class="col-lg-9 col-xl-8">
+        <!-- Print Action Toolbar -->
+        <div class="d-flex justify-content-between align-items-center mb-3 no-print">
+            <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Dashboard
+            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('student_track_bus') }}" class="btn btn-outline-danger">
+                    <i class="bi bi-geo-alt-fill me-1"></i> Track Bus Live
+                </a>
+                <button type="button" class="btn btn-success shadow-sm" onclick="window.print()">
+                    <i class="bi bi-printer-fill me-1"></i> Print / Save Bus Pass
+                </button>
+            </div>
+        </div>
+
+        {% if bus_pass and allocation %}
+            <!-- Digital Bus Pass Card -->
+            <div class="bus-pass-card">
+                <!-- Header -->
+                <div class="pass-header">
+                    <div class="d-flex justify-content-center align-items-center gap-3">
+                        <img src="{{ url_for('static', filename='images/alts_logo.png') }}" 
+                             alt="ALTS Logo" 
+                             style="height: 55px; width: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));">
+                        <div>
+                            <h3 class="mb-0 text-white">ANANTHALAKSHMI</h3>
+                            <p class="mb-0">INSTITUTE OF TECHNOLOGY & SCIENCES &bull; TRANSPORT DEPT.</p>
+                        </div>
+                    </div>
+                    <div class="badge bg-warning text-dark px-3 py-1 mt-2 text-uppercase fw-bold" style="letter-spacing: 1px;">
+                        OFFICIAL STUDENT BUS PASS ({{ allocation.academic_year.year_label }})
+                    </div>
+                </div>
+
+                <!-- Body -->
+                <div class="pass-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <table class="table table-sm table-borderless mb-0">
+                                <tbody>
+                                    <tr>
+                                        <td class="text-muted small text-uppercase" style="width: 140px;">Student Name</td>
+                                        <td class="fw-bold fs-5 text-dark">{{ student.name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted small text-uppercase">College ID / Roll</td>
+                                        <td><span class="badge bg-danger fs-6 px-2 py-1">{{ student.college_id }}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted small text-uppercase">Year & Shift</td>
+                                        <td>
+                                            <span class="badge bg-primary fs-6">{{ student.get_schedule().year_label }}</span>
+                                            <span class="badge bg-warning text-dark">{{ student.get_schedule().morning_time }} - {{ student.get_schedule().evening_time }}</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted small text-uppercase">Assigned Bus</td>
+                                        <td class="fw-bold fs-5 text-primary">{{ allocation.bus.bus_number }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted small text-uppercase">Allotted Seat</td>
+                                        <td>
+                                            <span class="badge bg-success fs-6 px-3 py-1">
+                                                <i class="bi bi-shield-check"></i> Seat {{ allocation.seat_number }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted small text-uppercase">Route</td>
+                                        <td class="fw-semibold text-secondary">{{ allocation.bus.route.route_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted small text-uppercase">Boarding Stop</td>
+                                        <td class="fw-bold text-dark">{{ allocation.boarding_point.stop_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted small text-uppercase">Payment Status</td>
+                                        <td><span class="badge bg-success-subtle text-success border border-success fw-bold px-2 py-1">PAID (LOCKED & CONFIRMED)</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted small text-uppercase">Pass ID</td>
+                                        <td class="text-muted font-monospace small">{{ bus_pass.pass_id }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- QR Code Section -->
+                        <div class="col-md-4 text-center mt-3 mt-md-0">
+                            <div class="pass-qr-box">
+                                <img src="{{ url_for('static', filename=bus_pass.qr_code_path) }}" 
+                                     alt="Bus Pass QR Code" 
+                                     class="img-fluid rounded mb-2">
+                                <small class="d-block text-muted font-monospace" style="font-size: 0.72rem;">{{ bus_pass.pass_id }}</small>
+                                <span class="badge bg-light text-secondary border mt-1" style="font-size: 0.68rem;">Scan for Verification</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seal / Stamp -->
+                    <div class="pass-stamp">
+                        VERIFIED & ISSUED
+                    </div>
+                </div>
+
+                <!-- Footer strip -->
+                <div class="bg-light p-2 text-center text-muted border-top" style="font-size: 0.75rem;">
+                    Valid for Academic Year {{ allocation.academic_year.year_label }} &bull; 
+                    Shift: <strong>{{ student.get_schedule().morning_time }} - {{ student.get_schedule().evening_time }}</strong> &bull; Present pass upon boarding
+                </div>
+            </div>
+        {% else %}
+            <div class="card p-5 text-center shadow-sm">
+                <i class="bi bi-qr-code text-muted" style="font-size: 4rem;"></i>
+                <h4 class="fw-bold text-secondary mt-3">No Active Bus Pass Found</h4>
+                <p class="text-muted">You do not have a confirmed bus pass for this academic year. Please select a bus and complete the fee payment.</p>
+                <div>
+                    <a href="{{ url_for('student_buses') }}" class="btn btn-danger px-4 fw-bold">Select Bus & Seat</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

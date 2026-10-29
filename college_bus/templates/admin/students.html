@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Registered Students Database - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="row my-3">
+    <div class="col-12">
+        <!-- Top Toolbar & Metrics -->
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-danger p-2"><i class="bi bi-database-fill fs-5"></i></span>
+                            <h4 class="fw-bold text-dark mb-0">Registered Students Database</h4>
+                        </div>
+                        <p class="text-muted small mb-0 mt-1">
+                            SQLite Master Records &bull; Total: <strong>{{ students | length }}</strong> Registered Students &bull; Academic Year {{ active_year.year_label }}
+                        </p>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-danger fw-bold btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+                            <i class="bi bi-person-plus-fill me-1"></i> Add Student to Database
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Database Table -->
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold text-primary mb-0">
+                    <i class="bi bi-people-fill me-2"></i> Student Transportation Registry
+                </h5>
+                <div class="input-group input-group-sm" style="max-width: 280px;">
+                    <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                    <input type="text" id="studentSearchInput" class="form-control" placeholder="Search by name or 10-char ID..." onkeyup="filterStudents()">
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="studentsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Student Name</th>
+                                <th>College ID (10 Chars)</th>
+                                <th>Year & Shift Timing</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Registered Date</th>
+                                <th>Bus & Seat</th>
+                                <th>Fee / Pass Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in students %}
+                                {% set alloc = s.get_confirmed_allocation(active_year.id) or s.get_latest_allocation() %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td class="fw-bold text-dark">{{ s.name }}</td>
+                                    <td><span class="badge bg-danger font-monospace fs-6">{{ s.college_id }}</span></td>
+                                    <td>
+                                        <span class="badge {% if s.year_of_study == 1 %}bg-info text-dark{% else %}bg-primary text-white{% endif %}">
+                                            {{ s.get_schedule().year_label }}
+                                        </span>
+                                        <small class="d-block text-muted" style="font-size: 0.72rem;">
+                                            <i class="bi bi-clock"></i> {{ s.get_schedule().morning_time }} - {{ s.get_schedule().evening_time }}
+                                        </small>
+                                    </td>
+                                    <td><small>{{ s.email }}</small></td>
+                                    <td><small>{{ s.phone_number }}</small></td>
+                                    <td class="text-muted small">{{ s.created_at.strftime('%d-%b-%Y') if s.created_at else 'Active' }}</td>
+                                    <td>
+                                        {% if alloc %}
+                                            <span class="badge bg-warning text-dark">{{ alloc.bus.bus_number }}</span>
+                                            <span class="badge bg-success">Seat {{ alloc.seat_number }}</span>
+                                        {% else %}
+                                            <span class="text-muted small">Not Allotted</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if alloc and alloc.status == 'CONFIRMED' %}
+                                            <span class="badge bg-success"><i class="bi bi-check-circle"></i> Paid & Locked</span>
+                                        {% elif alloc and alloc.status == 'PENDING' %}
+                                            <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split"></i> Pending</span>
+                                        {% else %}
+                                            <span class="badge bg-light text-muted border">No Seat</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('admin_delete_student', student_id=s.id) }}" onsubmit="return confirm('Delete student {{ s.name }} ({{ s.college_id }}) from database?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Student Record">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="10" class="text-center py-4 text-muted">No students registered in database yet.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Student Modal -->
+<div class="modal fade" id="addStudentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded-4 border-0">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-person-plus-fill me-2"></i> Register Student Directly into Database</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-toggle="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin_add_student') }}">
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-7">
+                            <label for="modal_name" class="form-label fw-bold">Student Name</label>
+                            <input type="text" class="form-control" id="modal_name" name="name" required placeholder="Full Name">
+                        </div>
+                        <div class="col-md-5">
+                            <label for="modal_year" class="form-label fw-bold">Year of Study & Shift</label>
+                            <select class="form-select" id="modal_year" name="year_of_study" required>
+                                <option value="1">1st Year (8:30 AM - 5:00 PM)</option>
+                                <option value="2">2nd Year (7:30 AM - 4:00 PM)</option>
+                                <option value="3">3rd Year (7:30 AM - 4:00 PM)</option>
+                                <option value="4">4th Year (7:30 AM - 4:00 PM)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="modal_college_id" class="form-label fw-bold">
+                                Student ID (Roll No) <span class="badge bg-danger">Exactly 10 Chars</span>
+                            </label>
+                            <input type="text" class="form-control text-uppercase" 
+                                   id="modal_college_id" name="college_id" 
+                                   maxlength="10" minlength="10" 
+                                   pattern="(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9]{10}" 
+                                   required placeholder="e.g. 23B91A0503">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="modal_phone" class="form-label fw-bold">Phone Number</label>
+                            <input type="tel" class="form-control" id="modal_phone" name="phone_number" required placeholder="Mobile number">
+                        </div>
+                        <div class="col-12">
+                            <label for="modal_email" class="form-label fw-bold">Email Address</label>
+                            <input type="email" class="form-control" id="modal_email" name="email" required placeholder="name@college.edu">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="modal_password" class="form-label fw-bold">Initial Password</label>
+                            <input type="password" class="form-control" id="modal_password" name="password" required value="student123">
+                            <small class="text-muted">Default is student123</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger fw-bold">Save Student to SQLite</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function filterStudents() {
+    const input = document.getElementById('studentSearchInput');
+    const filter = input.value.toUpperCase();
+    const table = document.getElementById('studentsTable');
+    const tr = table.getElementsByTagName('tr');
+
+    for (let i = 1; i < tr.length; i++) {
+        const tdName = tr[i].getElementsByTagName('td')[1];
+        const tdId = tr[i].getElementsByTagName('td')[2];
+        if (tdName || tdId) {
+            const txtName = tdName ? (tdName.textContent || tdName.innerText) : '';
+            const txtId = tdId ? (tdId.textContent || tdId.innerText) : '';
+            if (txtName.toUpperCase().indexOf(filter) > -1 || txtId.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = '';
+            } else {
+                tr[i].style.display = 'none';
+            }
+        }
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Buses - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="row g-4 my-3">
+    <!-- Add New Bus Card -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-plus-circle me-1"></i> Add College Bus</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('admin_add_bus') }}">
+                    <div class="mb-3">
+                        <label for="bus_number" class="form-label fw-bold">Bus Number / Code</label>
+                        <input type="text" class="form-control" id="bus_number" name="bus_number" required placeholder="e.g. BUS-07">
+                    </div>
+                    <div class="mb-3">
+                        <label for="capacity" class="form-label fw-bold">Total Passenger Capacity</label>
+                        <input type="number" class="form-control" id="capacity" name="capacity" value="40" min="10" max="60" required>
+                        <small class="text-muted">Standard college bus is 40 seats (2x2 layout).</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="route_id" class="form-label fw-bold">Assigned Transit Route</label>
+                        <select class="form-select" id="route_id" name="route_id" required>
+                            {% for r in routes %}
+                                <option value="{{ r.id }}">{{ r.route_name }} (Fee: ₹{{ r.annual_fee | int }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 fw-bold">
+                        <i class="bi bi-save me-1"></i> Save & Generate Seats
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Buses List -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold text-primary mb-0"><i class="bi bi-bus-front me-2"></i> Registered College Fleet ({{ buses | length }})</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Bus Code</th>
+                                <th>Route Details</th>
+                                <th>Driver</th>
+                                <th>Capacity</th>
+                                <th>Available ({{ active_year.year_label }})</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for b in buses %}
+                                <tr>
+                                    <td class="fw-bold text-primary fs-6">{{ b.bus_number }}</td>
+                                    <td>
+                                        <div class="fw-semibold">{{ b.route.route_name }}</div>
+                                        <small class="text-muted">Fee: ₹{{ b.route.annual_fee | int }}</small>
+                                    </td>
+                                    <td>{{ b.driver.name if b.driver else '<span class="badge bg-light text-muted border">Unassigned</span>' | safe }}</td>
+                                    <td><span class="badge bg-secondary">{{ b.capacity }} Seats</span></td>
+                                    <td><span class="badge bg-success fs-6">{{ b.get_available_seats_count(active_year.id) }} Available</span></td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('admin_delete_bus', bus_id=b.id) }}" onsubmit="return confirm('Are you sure you want to delete bus {{ b.bus_number }}?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">No buses registered yet.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Ananthalakshmi (ALTS) College Bus System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-3">
+    <div class="col-md-7 col-lg-5">
+        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+            <div class="card-body p-4 p-md-5">
+                <!-- College Shield Logo -->
+                <div class="text-center mb-4">
+                    <img src="{{ url_for('static', filename='images/alts_logo.png') }}" 
+                         alt="ALTS College Logo" 
+                         class="img-fluid mb-2" 
+                         style="max-height: 120px; filter: drop-shadow(0 6px 12px rgba(185, 28, 28, 0.25));">
+                    <h3 class="fw-bold text-danger mb-0" style="letter-spacing: 0.5px;">ANANTHALAKSHMI</h3>
+                    <p class="text-secondary fw-semibold small mb-1">Institute of Technology & Sciences (ALTS)</p>
+                    <div class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1 rounded-pill fw-semibold">
+                        College Bus Seat Allotment & Tracking
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="mb-3">
+                        <label for="identifier" class="form-label fw-semibold text-secondary small text-uppercase">
+                            Student ID / Staff Username
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white text-muted border-end-0"><i class="bi bi-person-badge"></i></span>
+                            <input type="text" class="form-control border-start-0 ps-0" 
+                                   id="identifier" name="identifier" required 
+                                   placeholder="Enter any Student ID (e.g. 23B91A0501)"
+                                   autocomplete="username">
+                        </div>
+                        <div class="form-text small text-muted">
+                            <i class="bi bi-info-circle"></i> Enter any Student ID & password to sign in or auto-register immediately.
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-semibold text-secondary small text-uppercase">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white text-muted border-end-0"><i class="bi bi-shield-lock"></i></span>
+                            <input type="password" class="form-control border-start-0 ps-0" 
+                                   id="password" name="password" required 
+                                   placeholder="Enter any password">
+                        </div>
+                        <div class="form-text small text-muted">
+                            Password as per your choice.
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-danger w-100 py-2 fw-bold shadow-sm rounded-3">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Sign In to Portal
+                    </button>
+                </form>
+
+                <div class="text-center mt-4 pt-3 border-top">
+                    <p class="text-muted small mb-0">New Student? <a href="{{ url_for('register') }}" class="fw-bold text-danger text-decoration-none">Register 10-Digit College ID</a></p>
+                </div>
+
+                <!-- 1-Click Demo Credentials for Mini-Project Presentation -->
+                <div class="mt-4 p-3 bg-light rounded-3 border">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-lightning-charge-fill text-warning fs-5 me-2"></i>
+                        <span class="fw-bold small text-dark">Quick Demo Credentials (1-Click Fill)</span>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-danger text-start bg-white" onclick="fillCreds('23B91A0501', 'student123')">
+                            <i class="bi bi-mortarboard-fill me-1 text-danger"></i> Student: <strong>Vijitha</strong> (<code>23B91A0501</code> - 10 Chars)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-success text-start bg-white" onclick="fillCreds('driver_ramesh', 'driver123')">
+                            <i class="bi bi-steering me-1 text-success"></i> Driver: <strong>Ramesh Kumar</strong> (BUS-05)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-dark text-start bg-white" onclick="fillCreds('admin', 'admin123')">
+                            <i class="bi bi-shield-lock-fill me-1 text-dark"></i> Admin: <strong>College Administrator</strong>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function fillCreds(ident, pass) {
+    document.getElementById('identifier').value = ident;
+    document.getElementById('password').value = pass;
+}
+</script>
+{% endblock %}

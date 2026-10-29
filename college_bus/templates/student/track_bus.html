@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}Live Bus Tracking & Timetable - ALTS College Bus{% endblock %}
+
+{% block content %}
+<!-- Approaching Bus Proximity Alert Banner (Animated when within 1.2 KM) -->
+<div id="proximityAlertBanner" class="alert alert-danger shadow-lg border-2 border-danger d-flex align-items-center mb-4 d-none rounded-4 p-3 animate-pulse" role="alert">
+    <div class="fs-1 text-danger me-3">
+        <i class="bi bi-bell-fill"></i>
+    </div>
+    <div class="flex-grow-1" id="alertMessageText">
+        <strong>🚨 BUS APPROACHING ALERT:</strong> Your college bus is near your stop!
+    </div>
+    <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="playArrivalChime()">
+        <i class="bi bi-volume-up-fill"></i> Chime
+    </button>
+</div>
+
+<div class="row g-4 my-1">
+    <!-- Telemetry & Info Sidebar -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 rounded-4 mb-3">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold text-primary mb-0">
+                    <i class="bi bi-radar me-1 text-danger"></i> Live Telemetry
+                </h5>
+                <span id="tripStatusBadge" class="badge bg-warning text-dark px-3 py-1">
+                    {{ bus_location.trip_status if bus_location else 'IDLE' }}
+                </span>
+            </div>
+            <div class="card-body p-4">
+                <div class="text-center pb-3 border-bottom mb-3">
+                    <div class="d-inline-flex p-3 bg-warning-subtle text-warning rounded-circle mb-2 shadow-sm">
+                        <i class="bi bi-bus-front-fill fs-2 text-dark"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-0">{{ bus.bus_number }}</h3>
+                    <div class="text-muted small fw-semibold">{{ bus.route.route_name }}</div>
+                </div>
+
+                <!-- Distance from Student's Boarding Stop -->
+                {% if student_stop %}
+                    <div class="p-3 bg-danger-subtle text-danger rounded-3 border border-danger-subtle mb-3">
+                        <small class="text-uppercase fw-bold text-danger opacity-75 d-block">Distance to Your Boarding Stop</small>
+                        <div class="d-flex align-items-baseline justify-content-between mt-1">
+                            <span class="fs-3 fw-bold text-dark" id="distanceToStop">Calculating...</span>
+                            <span class="badge bg-danger fs-6" id="estimatedArrival">Calculating ETA</span>
+                        </div>
+                        <small class="text-secondary d-block mt-1">
+                            <i class="bi bi-geo-alt-fill text-danger me-1"></i> Boarding: <strong>{{ student_stop.stop_name }}</strong> (Pickup: {{ student_stop.pickup_time }})
+                        </small>
+                    </div>
+                {% endif %}
+
+                <!-- Nearest Bus Stop Live Detector -->
+                <div class="p-3 bg-light rounded-3 border mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <small class="text-uppercase fw-bold text-secondary" style="font-size: 0.75rem;">
+                            <i class="bi bi-pin-map-fill text-primary"></i> Current Nearest Stop
+                        </small>
+                        <span class="badge bg-secondary-subtle text-secondary small">Real-time</span>
+                    </div>
+                    <div class="fw-bold text-primary fs-6" id="nearestStopName">Detecting...</div>
+                    <small class="text-muted d-block" id="nearestStopDist">Comparing coordinates...</small>
+                </div>
+
+                <!-- Detailed GPS readout -->
+                <div class="bg-light p-3 rounded-3 border mb-3">
+                    <div class="row g-2 small">
+                        <div class="col-6">
+                            <span class="text-muted d-block">Latitude:</span>
+                            <span class="fw-bold font-monospace text-dark" id="liveLat">{{ bus_location.latitude if bus_location else '14.4137' }}</span>
+                        </div>
+                        <div class="col-6">
+                            <span class="text-muted d-block">Longitude:</span>
+                            <span class="fw-bold font-monospace text-dark" id="liveLng">{{ bus_location.longitude if bus_location else '77.7126' }}</span>
+                        </div>
+                        <div class="col-6 mt-2">
+                            <span class="text-muted d-block">Current Speed:</span>
+                            <span class="fw-bold text-dark" id="liveSpeed">{{ bus_location.speed if bus_location else '0' }} km/h</span>
+                        </div>
+                        <div class="col-6 mt-2">
+                            <span class="text-muted d-block">Last Telemetry:</span>
+                            <span class="fw-semibold text-primary" id="lastUpdated">{{ bus_location.updated_at.strftime('%I:%M:%S %p') if bus_location and bus_location.updated_at else 'Active' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Driver Contact -->
+                <div class="d-flex align-items-center justify-content-between p-2 border rounded-3 bg-white mb-2">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-light rounded-circle p-2 me-2">
+                            <i class="bi bi-person-fill text-muted fs-5"></i>
+                        </div>
+                        <div>
+                            <span class="d-block fw-bold small">{{ bus.driver.name if bus.driver else 'Ramesh Kumar' }}</span>
+                            <small class="text-muted">Driver &bull; {{ bus.driver.phone_number if bus.driver else '9876543210' }}</small>
+                        </div>
+                    </div>
+                    <a href="tel:{{ bus.driver.phone_number if bus.driver else '9876543210' }}" class="btn btn-sm btn-outline-success rounded-circle">
+                        <i class="bi bi-telephone-fill"></i>
+                    </a>
+                </div>
+
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('student_dashboard') }}" class="btn btn-sm btn-link text-decoration-none">
+                        <i class="bi bi-arrow-left"></i> Back to Student Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Official Route Timetable Card -->
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold text-uppercase text-secondary mb-0">
+                    <i class="bi bi-clock-history me-1 text-primary"></i> Bus Timings & Schedule
+                </h6>
+                <span class="badge bg-primary-subtle text-primary small">Morning & Return</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush small">
+                    {% for stop in all_stops %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center {% if student_stop and stop.id == student_stop.id %}bg-danger-subtle fw-bold text-danger{% endif %}">
+                            <div>
+                                <span class="badge bg-secondary me-1">{{ stop.stop_order }}</span>
+                                {{ stop.stop_name }}
+                                {% if student_stop and stop.id == student_stop.id %}
+                                    <span class="badge bg-danger ms-1">My Stop</span>
+                                {% endif %}
+                            </div>
+                            <span class="fw-semibold {% if student_stop and stop.id == student_stop.id %}text-danger{% else %}text-muted{% endif %}">
+                                <i class="bi bi-alarm me-1"></i>{{ stop.pickup_time }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                    <div class="list-group-item bg-light p-2 text-center text-muted" style="font-size: 0.75rem;">
+                        <i class="bi bi-arrow-repeat text-primary me-1"></i> Evening Return Departure: <strong>04:45 PM</strong> from College Campus
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Leaflet Map Column -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden h-100">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <div class="fw-bold text-dark">
+                    <i class="bi bi-map-fill text-danger me-2"></i> Real-Time OpenStreetMap GPS View
+                </div>
+                <div class="d-flex align-items-center gap-2 small text-muted">
+                    <span class="spinner-grow spinner-grow-sm text-success" role="status"></span>
+                    <span>Live GPS Polling Active (Every 3s)</span>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div id="busMap" style="min-height: 620px; width: 100%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/tracking.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const trackingConfig = {
+        busId: {{ bus.id }},
+        busNumber: "{{ bus.bus_number }}",
+        studentStop: {{ student_stop_json | safe }},
+        allStops: {{ all_stops_json | safe }},
+        initialBusLocation: {{ bus_location_json | safe }}
+    };
+    initBusMap(trackingConfig);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,367 @@
+/* College Bus System - Modern Theme & Background */
+:root {
+    --primary-color: #1a2a6c;
+    --primary-hover: #132053;
+    --accent-yellow: #fdbb2d;
+    --accent-gold: #e67e22;
+    --seat-available: #28a745;
+    --seat-occupied: #dc3545;
+    --seat-selected: #007bff;
+    --card-bg: rgba(255, 255, 255, 0.94);
+    --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+body {
+    background: url('/static/images/college_bus_bg.png') no-repeat center center fixed;
+    background-size: cover;
+    background-color: #eef2f6;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    color: #2c3e50;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+/* Glassmorphism Cards */
+.card {
+    background-color: var(--card-bg) !important;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: var(--card-shadow);
+    border-radius: 14px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+}
+
+/* Navigation */
+.navbar-custom {
+    background: linear-gradient(90deg, #1a2a6c, #273c75) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #fff !important;
+}
+
+.navbar-brand span {
+    color: var(--accent-yellow);
+}
+
+/* Hero & Page Header */
+.page-header {
+    background: linear-gradient(rgba(26, 42, 108, 0.85), rgba(39, 60, 117, 0.85)),
+                url('/static/images/college_bus_bg.png') center/cover;
+    color: white;
+    padding: 2.2rem 1rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: var(--card-shadow);
+}
+
+/* Quick Action Buttons */
+.action-btn-card {
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+    text-decoration: none;
+    color: #1a2a6c;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    transition: all 0.25s ease;
+    display: block;
+    height: 100%;
+}
+
+.action-btn-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(26, 42, 108, 0.15);
+    background: #f8fafc;
+    color: #0d47a1;
+}
+
+.action-btn-card .icon-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.75rem auto;
+    font-size: 1.6rem;
+    background: #eef2ff;
+    color: #1a2a6c;
+}
+
+/* Visual Bus Seat Layout */
+.bus-layout-container {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 3px solid #cbd5e1;
+    border-radius: 28px 28px 16px 16px;
+    padding: 24px 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+}
+
+.bus-windshield {
+    background: linear-gradient(180deg, #93c5fd, #bfdbfe);
+    height: 38px;
+    border-radius: 20px 20px 6px 6px;
+    margin-bottom: 16px;
+    border: 2px solid #60a5fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #1e3a8a;
+    letter-spacing: 1px;
+}
+
+.driver-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px dashed #e2e8f0;
+}
+
+.driver-seat {
+    background: #475569;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.seat-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.seat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.seat-column-pair {
+    display: flex;
+    gap: 10px;
+}
+
+.seat-aisle {
+    width: 32px;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-weight: bold;
+    user-select: none;
+}
+
+.bus-seat {
+    width: 50px;
+    height: 52px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    user-select: none;
+    position: relative;
+}
+
+.bus-seat .seat-label {
+    font-size: 0.8rem;
+}
+
+.bus-seat .seat-type-tag {
+    font-size: 0.6rem;
+    font-weight: 500;
+    opacity: 0.85;
+}
+
+/* Seat Color Coding */
+.bus-seat.available {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border-color: #81c784;
+}
+
+.bus-seat.available:hover {
+    background-color: #c8e6c9;
+    transform: scale(1.08);
+    box-shadow: 0 4px 10px rgba(46, 125, 50, 0.25);
+}
+
+.bus-seat.occupied {
+    background-color: #ffebee;
+    color: #c62828;
+    border-color: #ef9a9a;
+    cursor: not-allowed;
+    opacity: 0.75;
+}
+
+.bus-seat.selected {
+    background-color: #1a73e8 !important;
+    color: white !important;
+    border-color: #1557b0 !important;
+    transform: scale(1.1);
+    box-shadow: 0 6px 14px rgba(26, 115, 232, 0.35);
+    animation: pulseSelect 1s infinite alternate;
+}
+
+@keyframes pulseSelect {
+    0% { box-shadow: 0 0 0 0 rgba(26, 115, 232, 0.6); }
+    100% { box-shadow: 0 0 0 8px rgba(26, 115, 232, 0); }
+}
+
+.seat-legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.legend-box {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+}
+
+/* Digital Bus Pass Styling */
+.bus-pass-card {
+    background: #ffffff;
+    border: 4px double #1a2a6c;
+    border-radius: 16px;
+    max-width: 650px;
+    margin: 0 auto;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+
+.pass-header {
+    background: linear-gradient(135deg, #1a2a6c, #273c75);
+    color: white;
+    padding: 1.25rem;
+    text-align: center;
+    position: relative;
+}
+
+.pass-header h3 {
+    margin: 0;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 1.4rem;
+}
+
+.pass-header p {
+    margin: 2px 0 0 0;
+    font-size: 0.85rem;
+    color: var(--accent-yellow);
+}
+
+.pass-body {
+    padding: 1.75rem;
+}
+
+.pass-qr-box {
+    text-align: center;
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.pass-qr-box img {
+    max-width: 150px;
+    height: auto;
+}
+
+.pass-stamp {
+    position: absolute;
+    bottom: 25px;
+    right: 25px;
+    border: 3px solid #2e7d32;
+    color: #2e7d32;
+    padding: 6px 14px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    border-radius: 8px;
+    transform: rotate(-12deg);
+    opacity: 0.85;
+}
+
+/* Driver Big Touch Controls */
+.driver-control-btn {
+    padding: 18px 24px;
+    font-size: 1.3rem;
+    font-weight: 800;
+    border-radius: 14px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    transition: all 0.2s ease;
+}
+
+.driver-control-btn:active {
+    transform: scale(0.98);
+}
+
+/* Map Containers */
+#busMap, #adminLiveMap {
+    height: 520px;
+    width: 100%;
+    border-radius: 14px;
+    box-shadow: var(--card-shadow);
+    border: 2px solid #cbd5e1;
+    z-index: 1;
+}
+
+/* Print Styling for Bus Pass */
+@media print {
+    body {
+        background: #ffffff !important;
+    }
+    nav, footer, .no-print, .btn {
+        display: none !important;
+    }
+    .bus-pass-card {
+        box-shadow: none !important;
+        border: 2px solid #000 !important;
+        margin: 0 auto !important;
+        page-break-inside: avoid;
+    }
+}

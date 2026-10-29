@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Select Bus & Route - ALTS College Bus{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-3">
+    <div class="col-lg-10">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white py-3 border-bottom">
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-primary rounded-circle p-2 me-2">1</span>
+                    <h4 class="fw-bold text-primary mb-0">Select Bus, Route & Boarding Point</h4>
+                </div>
+                <p class="text-muted small mb-0 mt-1">Choose your academic session and preferred college transit route.</p>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('student_buses') }}">
+                    <!-- Academic Year -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="academic_year_id" class="form-label fw-bold">Academic Year</label>
+                            <select class="form-select" id="academic_year_id" name="academic_year_id" required>
+                                {% for year in academic_years %}
+                                    <option value="{{ year.id }}" {% if year.is_active %}selected{% endif %}>
+                                        Academic Year {{ year.year_label }} {% if year.is_active %}(Active){% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Available Buses Card Grid -->
+                    <h5 class="fw-bold text-dark mb-3">Available College Buses & Routes</h5>
+                    <div class="row g-3 mb-4">
+                        {% for item in bus_list %}
+                            <div class="col-md-6">
+                                <div class="card h-100 border p-3 bus-selection-card" style="cursor: pointer;" onclick="selectBus('{{ item.bus.id }}', '{{ item.bus.route.annual_fee }}')">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <span class="badge bg-warning text-dark fs-6 fw-bold px-3 py-1">
+                                                <i class="bi bi-bus-front-fill me-1"></i> {{ item.bus.bus_number }}
+                                            </span>
+                                            <h5 class="fw-bold text-primary mt-2 mb-1">{{ item.bus.route.route_name }}</h5>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input fs-5" type="radio" name="bus_id" id="bus_{{ item.bus.id }}" value="{{ item.bus.id }}" {% if loop.first %}checked{% endif %} required>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-muted small mb-3">
+                                        <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                                        <strong>{{ item.bus.route.start_point }}</strong> &rarr; <strong>{{ item.bus.route.destination }}</strong>
+                                    </div>
+
+                                    <div class="row g-2 text-center bg-light p-2 rounded-3 mb-3 border">
+                                        <div class="col-4">
+                                            <small class="text-muted d-block">Capacity</small>
+                                            <span class="fw-bold">{{ item.bus.capacity }} Seats</span>
+                                        </div>
+                                        <div class="col-4 border-start border-end">
+                                            <small class="text-muted d-block">Available</small>
+                                            <span class="fw-bold text-success">{{ item.available_seats }}</span>
+                                        </div>
+                                        <div class="col-4">
+                                            <small class="text-muted d-block">Annual Fee</small>
+                                            <span class="fw-bold text-primary">₹{{ item.bus.route.annual_fee | int }}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Boarding Points Dropdown for this Bus -->
+                                    <div class="boarding-select-container mt-auto">
+                                        <label for="boarding_point_{{ item.bus.id }}" class="form-label small fw-bold text-secondary mb-1">
+                                            Select Your Boarding Stop:
+                                        </label>
+                                        <select class="form-select form-select-sm boarding-dropdown" name="boarding_point_id" id="boarding_point_{{ item.bus.id }}" data-bus-id="{{ item.bus.id }}">
+                                            {% for stop in item.bus.route.boarding_points %}
+                                                <option value="{{ stop.id }}">
+                                                    {{ stop.stop_order }}. {{ stop.stop_name }} ({{ stop.pickup_time }})
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4 py-2 fw-bold shadow-sm">
+                            Proceed to Seat Selection <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function selectBus(busId, fee) {
+    const radio = document.getElementById('bus_' + busId);
+    if (radio) {
+        radio.checked = true;
+    }
+}
+</script>
+{% endblock %}

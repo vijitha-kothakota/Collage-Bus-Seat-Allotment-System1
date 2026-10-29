@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Driver GPS Console - ALTS College Bus{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-3">
+    <div class="col-md-9 col-lg-7">
+        <!-- Driver Profile & Bus Card -->
+        <div class="card shadow-lg border-0 rounded-4 overflow-hidden mb-4">
+            <div class="card-header bg-dark text-white p-3 p-md-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-warning text-dark p-2 rounded-circle fs-3">
+                            <i class="bi bi-steering"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold mb-0 text-white">{{ driver.name }}</h4>
+                            <small class="text-warning">Authorized College Bus Pilot &bull; Mobile: {{ driver.phone_number }}</small>
+                        </div>
+                    </div>
+                    <div>
+                        <span id="driverTripStatus" class="badge bg-secondary p-2">TRIP IDLE</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-4 text-center">
+                {% if driver.bus %}
+                    <div class="mb-4">
+                        <span class="badge bg-warning text-dark fs-4 px-4 py-2 fw-bold shadow-sm">
+                            <i class="bi bi-bus-front-fill me-1"></i> {{ driver.bus.bus_number }}
+                        </span>
+                        <h5 class="fw-bold text-primary mt-2 mb-1">{{ driver.bus.route.route_name }}</h5>
+                        <p class="text-muted small">
+                            {{ driver.bus.route.start_point }} &rarr; {{ driver.bus.route.destination }} ({{ driver.bus.capacity }} Passenger Seats)
+                        </p>
+                    </div>
+
+                    <!-- Big Mobile Touch Control Buttons -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <button type="button" id="startTripBtn" class="btn btn-success w-100 driver-control-btn d-flex flex-column align-items-center justify-content-center">
+                                <i class="bi bi-play-circle-fill fs-1 mb-1"></i>
+                                <span>START TRIP</span>
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button type="button" id="endTripBtn" class="btn btn-danger w-100 driver-control-btn d-flex flex-column align-items-center justify-content-center" disabled>
+                                <i class="bi bi-stop-circle-fill fs-1 mb-1"></i>
+                                <span>END TRIP</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Real-Time Mobile GPS Telemetry Screen -->
+                    <div class="bg-light p-3 p-md-4 rounded-3 border text-start mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <span class="fw-bold small text-uppercase text-secondary">
+                                <i class="bi bi-broadcast text-danger me-1"></i> Real-Time Phone GPS Stream
+                            </span>
+                            <span class="badge bg-dark" id="gpsAccuracy">Accuracy: Waiting</span>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <small class="text-muted d-block">Coordinates (Lat, Lng):</small>
+                                <span class="fw-bold font-monospace text-dark" id="driverLiveCoords">-- , --</span>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Total GPS Packets Sent:</small>
+                                <span class="fw-bold text-success fs-5" id="pingCount">0</span>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Last Transmitted:</small>
+                                <span class="fw-semibold text-primary" id="lastPingTime">Not started</span>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Trip Mode:</small>
+                                <span class="fw-semibold text-secondary">Mobile Geolocation</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Classroom / Indoor Presentation Helper Mode -->
+                    <div class="form-check form-switch text-start p-3 bg-white rounded-3 border">
+                        <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="simulationToggle">
+                        <label class="form-check-label small fw-bold text-dark" for="simulationToggle">
+                            Lab / Classroom Presentation Mode (Simulate Route along Stops)
+                        </label>
+                        <div class="form-text small text-muted ms-4">
+                            Check this switch when demonstrating the mini-project indoors on a laptop or stationary phone to simulate bus movement along actual stops.
+                        </div>
+                    </div>
+
+                    <!-- Android Phone GPS Instructions -->
+                    <div class="alert alert-info text-start mt-4 mb-0 small">
+                        <h6 class="fw-bold mb-1"><i class="bi bi-phone"></i> Mobile Phone GPS Instructions:</h6>
+                        <ul class="mb-0 ps-3">
+                            <li>Open this page on your Android smartphone browser (Chrome recommended).</li>
+                            <li>When prompted by the browser, tap <strong>"Allow location access"</strong>.</li>
+                            <li>Press <strong>START TRIP</strong> when departing the first bus stop.</li>
+                            <li>Keep the browser tab open while driving; updates are posted automatically to students' live map.</li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <div class="py-5 text-center text-muted">
+                        <i class="bi bi-exclamation-triangle fs-1 text-warning"></i>
+                        <h5 class="fw-bold mt-2">No Bus Assigned Yet</h5>
+                        <p>Please contact the college transport administrator to assign a bus to your driver profile.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/driver_gps.js') }}"></script>
+{% if driver.bus %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const driverConfig = {
+        busId: {{ driver.bus.id }},
+        busNumber: "{{ driver.bus.bus_number }}",
+        routeStops: {{ route_stops_json | safe }}
+    };
+    initDriverTracking(driverConfig);
+});
+</script>
+{% endif %}
+{% endblock %}

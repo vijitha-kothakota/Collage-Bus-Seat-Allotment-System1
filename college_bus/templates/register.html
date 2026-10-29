@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Student Registration - ALTS College Bus{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-3">
+    <div class="col-md-9 col-lg-7">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <img src="{{ url_for('static', filename='images/alts_logo.png') }}" 
+                         alt="ALTS College Logo" 
+                         class="img-fluid mb-2" 
+                         style="max-height: 85px;">
+                    <h3 class="fw-bold text-danger mb-1">Student Bus Registration</h3>
+                    <p class="text-muted small">Official Transport Registration &bull; Year-Based Shift Timings</p>
+                </div>
+
+                <!-- Shift Policy Notice -->
+                <div class="alert alert-info py-2 px-3 small rounded-3 mb-4">
+                    <div class="d-flex align-items-center mb-1">
+                        <i class="bi bi-clock-history text-primary fs-5 me-2"></i>
+                        <strong>Official College Bus Timings:</strong>
+                    </div>
+                    <ul class="mb-0 ps-3">
+                        <li><strong>1st Year Students:</strong> Morning: <strong>8:30 AM</strong> &bull; Evening Return: <strong>5:00 PM</strong></li>
+                        <li><strong>2nd, 3rd & 4th Years:</strong> Morning: <strong>7:30 AM</strong> &bull; Evening Return: <strong>4:00 PM</strong></li>
+                    </ul>
+                </div>
+
+                <form method="POST" action="{{ url_for('register') }}">
+                    <div class="row g-3">
+                        <div class="col-md-7">
+                            <label for="name" class="form-label fw-semibold">Full Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                                <input type="text" class="form-control" id="name" name="name" required placeholder="e.g. Vijitha">
+                            </div>
+                        </div>
+
+                        <div class="col-md-5">
+                            <label for="year_of_study" class="form-label fw-semibold">Year of Study & Shift</label>
+                            <select class="form-select" id="year_of_study" name="year_of_study" required>
+                                <option value="1" selected>1st Year (8:30 AM - 5:00 PM)</option>
+                                <option value="2">2nd Year (7:30 AM - 4:00 PM)</option>
+                                <option value="3">3rd Year (7:30 AM - 4:00 PM)</option>
+                                <option value="4">4th Year (7:30 AM - 4:00 PM)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="college_id" class="form-label fw-semibold">
+                                Student ID (Roll No) <span class="badge bg-danger">10 Chars Mixed</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-card-text"></i></span>
+                                <input type="text" class="form-control text-uppercase" 
+                                       id="college_id" name="college_id" 
+                                       maxlength="10" minlength="10" 
+                                       pattern="(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9]{10}" 
+                                       title="Student ID must be exactly 10 characters mixed with letters and numbers (e.g., 23B91A0501)"
+                                       required placeholder="e.g. 23B91A0501">
+                            </div>
+                            <div class="form-text small text-muted">
+                                Exactly 10 letters mixed with characters & digits.
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="phone_number" class="form-label fw-semibold">Phone Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-telephone"></i></span>
+                                <input type="tel" class="form-control" id="phone_number" name="phone_number" required placeholder="10-digit mobile number">
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="email" class="form-label fw-semibold">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                                <input type="email" class="form-control" id="email" name="email" required placeholder="name@college.edu or personal email">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="password" class="form-label fw-semibold">Password (As your wish)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+                                <input type="password" class="form-control" id="password" name="password" required placeholder="Enter password of choice">
+                            </div>
+                            <div class="form-text small text-muted">Any password of your wish.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="confirm_password" class="form-label fw-semibold">Confirm Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-shield-check"></i></span>
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required placeholder="Re-enter password">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-danger w-100 py-2 fw-bold shadow-sm rounded-3">
+                            <i class="bi bi-check-circle-fill me-1"></i> Register Student Account
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-4 pt-3 border-top">
+                    <p class="text-muted small mb-0">Already registered? <a href="{{ url_for('login') }}" class="fw-bold text-danger text-decoration-none">Log in here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

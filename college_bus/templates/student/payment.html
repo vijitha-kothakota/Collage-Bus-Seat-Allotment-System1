@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Pay Bus Fee - ALTS College Bus{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-3">
+    <div class="col-lg-8">
+        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+            <div class="card-header bg-primary text-white p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="fw-bold mb-1">
+                            <i class="bi bi-shield-check me-2"></i> College Bus Fee Portal
+                        </h4>
+                        <p class="mb-0 text-white-50 small">Secure Simulated Payment Gateway &bull; Academic Year {{ allocation.academic_year.year_label }}</p>
+                    </div>
+                    <span class="badge bg-warning text-dark fs-6 py-2 px-3 fw-bold">
+                        <i class="bi bi-clock-history me-1"></i> Payment Pending
+                    </span>
+                </div>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                <!-- Fee Summary Invoice -->
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th colspan="2" class="text-uppercase text-secondary small fw-bold">Fee Allotment Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-muted w-40">Student Name</td>
+                                <td class="fw-bold text-dark">{{ allocation.student.name }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">College ID</td>
+                                <td class="fw-bold text-primary">{{ allocation.student.college_id }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Bus Assigned</td>
+                                <td class="fw-bold text-dark">{{ allocation.bus.bus_number }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Route</td>
+                                <td>{{ allocation.bus.route.route_name }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Boarding Point</td>
+                                <td><strong>{{ allocation.boarding_point.stop_name }}</strong> (Pickup: {{ allocation.boarding_point.pickup_time }})</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Selected Seat</td>
+                                <td><span class="badge bg-primary fs-6 px-3">Seat {{ allocation.seat_number }}</span></td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Academic Year</td>
+                                <td>{{ allocation.academic_year.year_label }}</td>
+                            </tr>
+                            <tr class="table-active">
+                                <td class="fw-bold fs-5 text-dark">Total Annual Fee</td>
+                                <td class="fw-bold fs-4 text-success">₹{{ allocation.bus.route.annual_fee | int }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Simulated Payment Methods -->
+                <h5 class="fw-bold text-secondary mb-3">
+                    <i class="bi bi-wallet2 me-2"></i> Select Demo Payment Mode
+                </h5>
+
+                <form method="POST" action="{{ url_for('student_process_payment') }}" id="paymentForm">
+                    <input type="hidden" name="allocation_id" value="{{ allocation.id }}">
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label class="card p-3 h-100 border text-center cursor-pointer payment-option-card">
+                                <input type="radio" name="payment_method" value="UPI / QR (Demo)" class="form-check-input mx-auto mb-2" checked>
+                                <i class="bi bi-qr-code-scan fs-2 text-primary mb-1"></i>
+                                <span class="fw-bold d-block small">Instant UPI</span>
+                                <small class="text-muted">GPay / PhonePe / Paytm</small>
+                            </label>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="card p-3 h-100 border text-center cursor-pointer payment-option-card">
+                                <input type="radio" name="payment_method" value="Debit / Credit Card (Demo)" class="form-check-input mx-auto mb-2">
+                                <i class="bi bi-credit-card-2-front fs-2 text-success mb-1"></i>
+                                <span class="fw-bold d-block small">Bank Cards</span>
+                                <small class="text-muted">Visa / MasterCard / RuPay</small>
+                            </label>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="card p-3 h-100 border text-center cursor-pointer payment-option-card">
+                                <input type="radio" name="payment_method" value="Net Banking (Demo)" class="form-check-input mx-auto mb-2">
+                                <i class="bi bi-bank fs-2 text-warning mb-1"></i>
+                                <span class="fw-bold d-block small">Net Banking</span>
+                                <small class="text-muted">SBI / HDFC / ICICI</small>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning small d-flex align-items-center mb-4">
+                        <i class="bi bi-shield-lock-fill fs-4 me-2"></i>
+                        <div>
+                            <strong>Demo Payment Mode:</strong> No real money will be deducted. Clicking "Pay Now" will simulate a secure banking transaction, lock your seat in the database, and issue your official digital bus pass.
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Cancel & Return
+                        </a>
+                        <button type="submit" class="btn btn-success px-4 py-2 fw-bold fs-5 shadow" id="payNowBtn">
+                            <i class="bi bi-lock-fill me-1"></i> Pay Now ₹{{ allocation.bus.route.annual_fee | int }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
